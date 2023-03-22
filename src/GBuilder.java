@@ -23,11 +23,12 @@ public class GBuilder extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(e.getActionCommand().equals("+")){
+                if(drawerP.scale>1)
                 drawerP.scale--;
             }
             else if(e.getActionCommand().equals("-")){
                 drawerP.scale++;
-                System.out.println(1010101010);
+                //System.out.println(1010101010);
             }
             else if(e.getActionCommand().equals(">")){
                 drawerP.Xoffset--;
@@ -108,26 +109,27 @@ class Drawer extends JPanel
     public int Ofat;
     public int Xoffset,Yoffset;
     public int scale;
-    private double step=0.1;
-
+    private int X0,Y0;
+    private double drawStep=0.25;
     Drawer(){
+        X0=getWidth()/2+getXoffset();
+        Y0=getHeight()/2-getYoffset();
         Ofat=2;
         Xoffset=0;
         Yoffset=0;
         scale=10;
     }
-    public void paint(Graphics g)
+    public void paintComponent(Graphics g)
     {
-
         g.setColor(Color.BLACK);
         g.drawRect(1,1,getWidth()-2,getHeight()-2);
 
-        int X0=getWidth()/2+getXoffset();
-        int Y0=getHeight()/2-getYoffset();
+         X0=getWidth()/2+getXoffset();
+         Y0=getHeight()/2-getYoffset();
 
         //setka
         g.setColor(Color.GRAY);
-        {
+
             int p = scale*2;
             System.out.println(scale);
             for (int i = 0; i < p; i++) {
@@ -137,19 +139,50 @@ class Drawer extends JPanel
             for (int i = 0; i < p; i++) {
                 g.drawLine(getWidth() * i / p, 0, getWidth() * i / p, getHeight());
             }
-        }
 
         g.setColor(Color.BLACK);
-        g.fillRect(X0-Ofat,0,Ofat,getHeight());//OY
-        g.fillRect(0,Y0-Ofat,getWidth(),Ofat);//OX
+        g.fillRect(X0-Ofat/2,0,Ofat,getHeight());//OY
+        g.fillRect(0,Y0-Ofat/2,getWidth(),Ofat);//OX
+        g.setColor(Color.BLUE);
+
+        int xscale=scale*getWidth()/getHeight();
+        for(double i=-xscale-Xoffset;i<=xscale-drawStep-Xoffset;i+=drawStep) {
+
+            double x1=i;
+            double x2=i+drawStep;
+            double y1=func(i);
+            double y2=func(i+drawStep);
+            drawPoint(g,x1,y1,6);
+            connectPoints(g,x1,y1,x2,y2);
+        }
+        g.setColor(Color.BLACK);
+
     }
 
+    private double func(double x)
+    {
+        return Math.sin(Math.toRadians(x*100))*3;
+    }
     private int getXoffset(){
+        if(scale!=0)
         return Math.round(Xoffset*getHeight()/(scale*2));
+        else return 0;
     }
 
     private int getYoffset(){
+        if(scale!=0)
         return Math.round(Yoffset*getHeight()/(scale*2));
+        else return 0;
+    }
+
+    private void drawPoint(Graphics g,double x,double y, int fat)
+    {
+        g.fillOval((int)(X0+x*getHeight()/(scale*2)-fat/2),(int)(Y0-y*getHeight()/(scale*2)-fat/2),fat,fat);
+        //repaint();
+    }
+    private void connectPoints(Graphics g,double x1,double y1,double x2,double y2)
+    {
+        g.drawLine((int)(X0+x1*getHeight()/(scale*2)),(int)(Y0-y1*getHeight()/(scale*2)),(int)(X0+x2*getHeight()/(scale*2)),(int)(Y0-y2*getHeight()/(scale*2)));
     }
 }
 
