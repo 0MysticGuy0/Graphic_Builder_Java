@@ -37,6 +37,16 @@ public class Calculator {
             default: return 0.0;
         }
     }
+
+    private void CalculateByPriority(ArrayList<String> expArr){//просчитать основные действия по приоритету
+        solveOperations(expArr,'a');
+        solveOperations(expArr,'i','c');
+        solveOperations(expArr,'f');
+        solveOperations(expArr,'^','s');
+        solveOperations(expArr,'*','/');
+        solveOperations(expArr,'+','-');
+        if(expArr.size()==1 && expArr.get(0).equals("P")) expArr.set(0,Double.toString(Math.PI));
+    }
     public Operation getOperation(char operation)//получить объект операции
     {
         for(int i=0;i<AviableOperations.length;i++)
@@ -68,7 +78,7 @@ public class Calculator {
     }
     public double solve(String expr){//результат
         SetExpr(expr);
-        System.out.println(ExprStack);
+       // System.out.println(ExprStack);
         solveOperations(ExprStack,'(');
         CalculateByPriority(ExprStack);
         return Double.parseDouble(ExprStack.get(0));
@@ -90,15 +100,6 @@ public class Calculator {
         ExprStack.clear();
         ExprStack=copyExpr;
         return res;
-    }
-    private void CalculateByPriority(ArrayList<String> expArr){//просчитать основные действия по приоритету
-        solveOperations(expArr,'a');
-        solveOperations(expArr,'i','c');
-        solveOperations(expArr,'f');
-        solveOperations(expArr,'^','s');
-        solveOperations(expArr,'*','/');
-        solveOperations(expArr,'+','-');
-        if(expArr.size()==1 && expArr.get(0).equals("P")) expArr.set(0,Double.toString(Math.PI));
     }
 
     static double fact(double n)//Факториал
@@ -152,7 +153,7 @@ public class Calculator {
                 }
             }
         }
-       // System.out.println(ExprStack);
+        //System.out.println(ExprStack);
     }
 
     private void solveBrackets(int index)//решение скобок
@@ -234,7 +235,11 @@ public class Calculator {
                         if(ExprStack.size()>0 || AviableOperations[j].type.equals(OperationType.Unary_prefix) || AviableOperations[j].type.equals(OperationType.Variable) || AviableOperations[j].type.equals(OperationType.Other) || s=='-')//Если операция в начале выражения и не является  унарной-префиксной - не добавлять
                         {
                            if(s!='-') ExprStack.add(Character.toString(s));
-                           else {ExprStack.add("-1");ExprStack.add("*");}
+                           else
+                           {
+                               if(ExprStack.size()>0) ExprStack.add("+");
+                               ExprStack.add("-1");ExprStack.add("*");
+                           }
                         }
                     }
                 }
