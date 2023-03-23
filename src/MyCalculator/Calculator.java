@@ -19,7 +19,7 @@ public class Calculator {
                     new Operation('f',OperationType.Unary_postfix,  "!",    "Факториал числа"),
                     new Operation('a',OperationType.Unary_prefix,   "abs",  "Модуль числа"),
                     new Operation('X',OperationType.Variable,       "x",    "Переменная X"),
-                    new Operation('Y',OperationType.Variable,       "y",    "Переменная Y"),
+                    //new Operation('Y',OperationType.Variable,       "y",    "Переменная Y"),
 
             };
     static double calculateSimple(double a,char c,double b){//действия над двумя числами
@@ -94,6 +94,7 @@ public class Calculator {
         solveOperations(ExprStack,'(');
         CalculateByPriority(ExprStack);
         double res;
+        //System.out.println(ExprStack);
         if(ExprStack.size()>0)
           res=Double.parseDouble(ExprStack.get(0));
         else res=0.0;
@@ -126,6 +127,7 @@ public class Calculator {
                     else
                     {
                         double n1 = 1.0, n2=1.0;
+                        if(i!=0)
                         if (!getOperation(c).type.equals(OperationType.Unary_prefix))//если не унарная-префиксная операция
                         {
                             if(ar.get(i-1).equals("P")) n1=Math.PI;
@@ -141,6 +143,7 @@ public class Calculator {
 
                         if(!getOperation(c).type.equals(OperationType.Unary_postfix))//если не унарная-постфиксная операция
                              ar.remove(i + 1);
+                        if(i!=0)
                         if (!getOperation(c).type.equals(OperationType.Unary_prefix))//если не унарная-префиксная операция
                         {
                             ar.remove(i);
@@ -181,6 +184,7 @@ public class Calculator {
         ExprStack.subList(index+1,end+1).clear();
         //for(int j=end;j>index;j--) ExprStack.remove(j);
         ExprStack.set(index,subExpr.get(0));
+        System.out.println(ExprStack);
     }
 
     private String fixExpression(String expr){//убираем ненужное, заменяем нужное

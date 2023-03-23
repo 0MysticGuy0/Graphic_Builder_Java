@@ -1,9 +1,12 @@
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
 import MyCalculator.*;
 
 public class GBuilder extends JFrame {
@@ -20,6 +23,10 @@ public class GBuilder extends JFrame {
     JButton right=new JButton(">");
     JButton up=new JButton("^");
     JButton down=new JButton("V");
+
+    JPanel inputP=new JPanel();
+
+    ArrayList<graphInp> functionsAr=new ArrayList<>();
     ActionListener AL=new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -43,17 +50,53 @@ public class GBuilder extends JFrame {
             else if(e.getActionCommand().equals("V")){
                 drawerP.Yoffset++;
             }
+            else if(e.getActionCommand().equals("del")){
+                if(functionsAr.size()>1)
+                {
+                    for(int i=0;i<functionsAr.size();i++)
+                    {
+                        if(functionsAr.get(i).destroyB==e.getSource()) {
+                            inputP.remove(functionsAr.get(i));
+                            functionsAr.remove(i);
+                            drawerP.graphExpressions.remove(i);
+                            break;
+                        }
+                    }
+                }
+            }
+            else if(e.getActionCommand().equals("addInp")){
+                    for(int i=0;i<functionsAr.size();i++)
+                    {
+                        if(functionsAr.get(i).addB==e.getSource()) {
+                            functionsAr.add(i,new graphInp(drawerP,AL));
+                            inputP.add(functionsAr.get(i));
+                            drawerP.graphExpressions.add(i,Integer.toString(i));
+                            break;
+                        }
+                    }
+            }
+            System.out.println(functionsAr.size());
+            for(int i=0;i<functionsAr.size();i++)
+            {
+                drawerP.graphExpressions.set(i,functionsAr.get(i).expr.getText());
+            }
+
+            interactP.revalidate();
             repaint();
+            //System.out.println(drawerP.graphExpressions.get(0));
         }
     };
     ////////////////////////////////
     public GBuilder()
     {
+        inputP.setLayout(new BoxLayout(inputP,BoxLayout.Y_AXIS));
         setTitle("PankiHoy");
         setSize(startWith,startHeight);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         //setResizable(false);
         setLayout(null);
+        functionsAr.add(new graphInp(drawerP,AL));
+
         drawUI();
         setVisible(true);
     }
@@ -86,6 +129,15 @@ public class GBuilder extends JFrame {
         mainButtons.add(zoomIn);    mainButtons.add(zoomOut);   mainButtons.add(up);
         mainButtons.add(left);      mainButtons.add(right);     mainButtons.add(down);
 
+        interactP.add(inputP);
+        inputP.setSize(200,300);
+        inputP.setBorder(bord1);
+        for(graphInp i:functionsAr)
+        {
+            System.out.println(55555);
+            inputP.add(i);
+        }
+
         add(drawerP);
         add(interactP);
         //System.out.println(10);
@@ -94,14 +146,14 @@ public class GBuilder extends JFrame {
     public void paint(Graphics g){
         super.paint(g);
     }
-    public static void main(String []args)
+    public static void main(String []args)//////////////////MAIN
     {
         new GBuilder();
 
     }
 
 }
-
+///////////////////////////////////////////////////////////////////////////////////////
 class Drawer extends JPanel
 {
     Calculator calc;
@@ -110,7 +162,7 @@ class Drawer extends JPanel
     public int scale;
     private int X0,Y0;
     private double drawStep=0.1;
-    String graphExpression="abs(sin(x*20)*4)";
+    ArrayList<String> graphExpressions=new ArrayList();
     Drawer(){
         calc=new Calculator();
         X0=getWidth()/2+getXoffset();
@@ -119,6 +171,7 @@ class Drawer extends JPanel
         Xoffset=0;
         Yoffset=0;
         scale=10;
+        graphExpressions.add("sin(100*x)*3");
     }
     public void paintComponent(Graphics g)
     {
@@ -147,12 +200,14 @@ class Drawer extends JPanel
         g.setColor(Color.BLUE);
         //drawStep=0.025;
         //graphExpression="abs( 0.25*x+3* (cos (x*100) ) * sin(x) )";
-        graphExpression="abs(sin(x*20)*4)";
-        calc.SetExpr(graphExpression);
-        drawGraph(g);
-        calc.SetExpr("-abs(cos(x*10)*10)");
-        System.out.println(calc.ExprStack);
-        drawGraph(g);
+       // graphExpression="abs(sin(x*20)*4)";
+        for(String exp:graphExpressions) {
+            calc.SetExpr(exp);
+            drawGraph(g);
+            //calc.SetExpr("-abs(cos(x*10)*10)");
+            //System.out.println(calc.ExprStack);
+            //drawGraph(g);
+        }
     }
 
     public static boolean nearlyEquals(double a,double b,double inaccuracy)
@@ -220,3 +275,24 @@ class Drawer extends JPanel
     }
 }
 
+////////////////////////////
+class graphInp extends JPanel
+{
+    public JTextField expr=new JTextField("x^2",50);
+    public JButton destroyB=new JButton("-");
+    public JButton addB=new JButton("+");
+    static Drawer drawer;
+    graphInp(Drawer d,ActionListener AL)
+    {
+        drawer=d;
+        add(expr);
+        add(destroyB);
+        add(addB);
+        expr.setSize(200,50);
+        destroyB.setActionCommand("del");
+        destroyB.addActionListener(AL);
+        addB.setActionCommand("addInp");
+        addB.addActionListener(AL);
+        expr.addActionListener(AL);
+    }
+}
