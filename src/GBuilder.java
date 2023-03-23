@@ -106,12 +106,15 @@ public class GBuilder extends JFrame {
 
 class Drawer extends JPanel
 {
+    Calculator calc;
     public int Ofat;
     public int Xoffset,Yoffset;
     public int scale;
     private int X0,Y0;
-    private double drawStep=0.25;
+    private double drawStep=0.1;
+    public double drawInaccuracy=0.1;
     Drawer(){
+        calc=new Calculator();
         X0=getWidth()/2+getXoffset();
         Y0=getHeight()/2-getYoffset();
         Ofat=2;
@@ -144,25 +147,58 @@ class Drawer extends JPanel
         g.fillRect(X0-Ofat/2,0,Ofat,getHeight());//OY
         g.fillRect(0,Y0-Ofat/2,getWidth(),Ofat);//OX
         g.setColor(Color.BLUE);
-
-        int xscale=scale*getWidth()/getHeight();
-        for(double i=-xscale-Xoffset;i<=xscale-drawStep-Xoffset;i+=drawStep) {
-
-            double x1=i;
-            double x2=i+drawStep;
-            double y1=func(i);
-            double y2=func(i+drawStep);
-            drawPoint(g,x1,y1,6);
-            connectPoints(g,x1,y1,x2,y2);
-        }
-        g.setColor(Color.BLACK);
-
+        //drawStep=0.025;
+        String expr="abs( 0.25*x+3* (cos (x*100) ) * sin(x) )";
+       // String expr="sin(x)";
+        calc.SetExpr(expr);
+        drawGraph(g);
     }
 
     private double func(double x)
     {
         return Math.sin(Math.toRadians(x*100))*3;
     }
+    public static boolean nearlyEquals(double a,double b,double inaccuracy){
+        return ((a-b)>=-inaccuracy && (a-b)<=inaccuracy);
+    }
+
+    private void drawGraph(Graphics g){
+        int xscale=scale*getWidth()/getHeight();
+
+        for(double i=-xscale-Xoffset;i<=xscale-drawStep-Xoffset;i+=drawStep) {
+                double x1 = i;
+                double x2 = i + drawStep;
+                double y1 = calc.getPointY(i);
+                double y2 = calc.getPointY(i+drawStep);
+
+            if(!Double.isInfinite(y1)&& !Double.isNaN(y1) ) {
+                //System.out.println(y1);
+                drawPoint(g, x1, y1, 6);
+                if(!Double.isInfinite(y2)&& !Double.isNaN(y2))
+                connectPoints(g, x1, y1, x2, y2);
+            }
+            else System.out.println("INF or NAN ("+x1+" ; "+y1+")");
+        }
+
+        /*
+        double lastX=Double.NaN,lastY=Double.NaN;
+        for(double i=-xscale-Xoffset;i<=xscale-drawStep-Xoffset;i+=drawStep) {
+            for(double j=-scale-Yoffset;j<=scale-drawStep-Yoffset;j+=drawStep) {
+                if (nearlyEquals(j,i*i,drawStep))
+                {
+                    drawPoint(g, i, j, 6);
+                    if(!Double.isNaN(lastY) && !Double.isNaN(lastX))
+                        connectPoints(g,lastX,lastY,i,j);
+                    lastX=i;
+                    lastY=j;
+                }
+            }
+        }
+        */
+        g.setColor(Color.BLACK);
+    }
+
+    ///////////////
     private int getXoffset(){
         if(scale!=0)
         return Math.round(Xoffset*getHeight()/(scale*2));
