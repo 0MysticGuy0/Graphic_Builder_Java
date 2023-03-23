@@ -1,3 +1,5 @@
+package MyCalculator;
+
 public enum OperationType
 {
     Binary,

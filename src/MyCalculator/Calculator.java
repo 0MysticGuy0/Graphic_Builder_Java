@@ -1,3 +1,4 @@
+package MyCalculator;
 import java.util.ArrayList;
 
 public class Calculator {
@@ -43,7 +44,7 @@ public class Calculator {
         return null;
     }
 
-    ArrayList<String> ExprStack; //массив с эелементами выражения
+    public ArrayList<String> ExprStack; //массив с эелементами выражения
     public Calculator()
     {
         ExprStack=new ArrayList<>();
@@ -151,6 +152,7 @@ public class Calculator {
                 }
             }
         }
+       // System.out.println(ExprStack);
     }
 
     private void solveBrackets(int index)//решение скобок
@@ -208,6 +210,7 @@ public class Calculator {
                     else ExprStack.set(ExprStack.size()-1,"+"); //иначе можно заменить - на +
                     ExprStack.add("-1");
                     ExprStack.add("*");
+                    System.out.println("TTTTTT");
                 }
                 cur+=expr.charAt(i);//собираем число
                 if(i==expr.length()-1){
@@ -228,8 +231,11 @@ public class Calculator {
                     char s=AviableOperations[j].sign;
                     if(expr.charAt(i) == s)
                     {
-                        if(ExprStack.size()>0 || AviableOperations[j].type.equals(OperationType.Unary_prefix))//Если операция в начале выражения и не является  унарной-префиксной - не добавлять
-                            ExprStack.add(Character.toString(s));
+                        if(ExprStack.size()>0 || AviableOperations[j].type.equals(OperationType.Unary_prefix) || AviableOperations[j].type.equals(OperationType.Variable) || AviableOperations[j].type.equals(OperationType.Other) || s=='-')//Если операция в начале выражения и не является  унарной-префиксной - не добавлять
+                        {
+                           if(s!='-') ExprStack.add(Character.toString(s));
+                           else {ExprStack.add("-1");ExprStack.add("*");}
+                        }
                     }
                 }
             }
