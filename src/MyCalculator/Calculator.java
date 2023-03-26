@@ -1,4 +1,7 @@
 package MyCalculator;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class Calculator {
@@ -19,7 +22,8 @@ public class Calculator {
                     new Operation('f',OperationType.Unary_postfix,  "!",    "Факториал числа"),
                     new Operation('a',OperationType.Unary_prefix,   "abs",  "Модуль числа"),
                     new Operation('X',OperationType.Variable,       "x",    "Переменная X"),
-                    //new Operation('Y',OperationType.Variable,       "y",    "Переменная Y"),
+                    new Operation('Y',OperationType.Variable,       "y",    "Переменная Y"),
+                    new Operation('=',OperationType.Binary,       "=",      "Сравнение"),
 
             };
     static double calculateSimple(double a,char c,double b){//действия над двумя числами
@@ -103,6 +107,42 @@ public class Calculator {
         return res;
     }
 
+    public boolean canDraw(double x,double y,double inaccuracy) //сравнить
+    {
+        ArrayList<String> copyExpr=new ArrayList<>(ExprStack);//копируем уравнение для дальнейшего восстановления
+        for(int i=0;i<copyExpr.size();i++)//замена х на число
+        {
+            if(ExprStack.get(i).equals("X")) ExprStack.set(i,Double.toString(x));
+            else if(ExprStack.get(i).equals("Y")) ExprStack.set(i,Double.toString(y));
+        }
+        System.out.println("FFFFFF"+ExprStack);
+        for(int i=0;i<ExprStack.size();i++)
+        {
+            if(ExprStack.get(i).equals("=")) {
+               // ExprStack.add(ExprStack.indexOf(getOperation('=')) - 1, ")");
+               // ExprStack.add(ExprStack.indexOf(getOperation('=')) + 1, ")");
+               // ExprStack.add(0, "(");
+                //ExprStack.add( ")");
+                break;
+            }
+            else if(i==ExprStack.size()-1)  return false;
+        }
+       // System.out.println(ExprStack);
+        solveOperations(ExprStack,'(');
+        CalculateByPriority(ExprStack);
+       // System.out.println(ExprStack);
+        double leftP=Double.parseDouble( ExprStack.get( 0 ));
+        double rightP=Double.parseDouble( ExprStack.get( 2 ));
+        System.out.println("PreEndExpr: "+ExprStack);
+        ExprStack.clear();
+        ExprStack=copyExpr;
+        return nearlyEquals(leftP,rightP,0.05);
+    }
+
+    public static boolean nearlyEquals(double a,double b,double inaccuracy)
+    {
+        return ((a-b)>=-inaccuracy && (a-b)<=inaccuracy);
+    }
     static double fact(double n)//Факториал
     {
         double res=1;
@@ -110,6 +150,15 @@ public class Calculator {
             res*=i;
         }
         return res;
+    }
+
+    public  String getExpr()
+    {
+        String e="";
+        for(String p:ExprStack){
+            e+=p;
+        }
+        return e;
     }
     private void solveOperations(ArrayList<String> ar,char ...operations)//сократить выражение, решив некоторые действия
     {
@@ -184,7 +233,7 @@ public class Calculator {
         ExprStack.subList(index+1,end+1).clear();
         //for(int j=end;j>index;j--) ExprStack.remove(j);
         ExprStack.set(index,subExpr.get(0));
-        System.out.println(ExprStack);
+       // System.out.println(ExprStack);
     }
 
     private String fixExpression(String expr){//убираем ненужное, заменяем нужное
@@ -275,4 +324,5 @@ class Operation
         this.syntax=syntax;
         this.description=description;
     }
+
 }
